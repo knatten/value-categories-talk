@@ -12,20 +12,218 @@
 
 		<!-- Theme used for syntax highlighted code -->
 		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+        <style>
+            .reveal table tr td {
+                vertical-align:middle;
+                text-align:center;
+                margin:1em;
+                border-color:#191919;
+            }
+            .reveal table tr td.big-box {
+                background-color:#555;
+                height:6em;
+                width:6em;
+            }
+            .reveal table tr td.red {
+                color:#f99;
+            }
+            .reveal table tr td.hl-box {
+                background-color:#595;
+                height:6em;
+                width:6em;
+            }
+            .reveal table tr td.hl {
+                background-color:#595;
+            }
+        </style>
 	</head>
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2
-						<aside class="notes">
-						<p>Some notes</p>
-						</aside>
-						<p>Some slide text</p>
-						<aside class="notes">
-						<p>and some more notes</p>
-					</aside>
-				</section>
+				<section data-markdown>
+                    ## lvalues, rvalues, glvalues, prvalues, xvalues, help!
+                    #### Anders Schau Knatten, Zivid
+                    ##### Oslo C++ Users Group
+                    ##### 2022-11-03
+                </section>
+
+                <section data-auto-animate>
+                    <table>
+                        <tr><td class="big-box" data-id="lvalue">lvalue</td><td class="big-box" data-id="rvalue">rvalue</td></tr>
+                        <tr><td data-id="has-identity">Has identity<br/>&nbsp;</td><td data-id="no-identity">No identity<br/>&nbsp;</td></tr>
+                    </table>
+                    <div class="r-stack">
+                        <pre class="fragment current-visible"><code data-trim>
+                        std::string s{"foo"};
+                        s = std::string{"bar"};
+                        </code></pre>
+                        <pre class="fragment current-visible"><code data-trim>
+                        std::string s{"foo"};
+                        s = std::string{"bar"};
+                        std::string{"bar"} = s;
+                        </code></pre>
+                        <pre class="fragment" data-id="code"><code data-trim>
+                        std::string s{"foo"};
+                        f(s); //lvalue
+                        f(std::string{"foo"}); //rvalue
+                        </code></pre>
+                    </div>
+                    <aside class="notes" data-markdown>
+                    - Before C++11 had only two value categories
+                    - Lvalues things with identity, rvalues not
+                    - Lvalues typically left hand side of expression
+                    - Rvalues typically right hand side
+                    - First line normal, second line actually legal, but unusual
+                    - NEXT
+                    - C++11 introduced move semantics
+                    - Given `f`, want to be able to move from an rvalue but not lvalue
+                    </aside>
+                </section>
+
+                <section data-auto-animate>
+                    <table>
+                        <tr><td data-id="cant-move">Can't move</td><td data-id="can-move">Can move</td></tr>
+                        <tr><td class="big-box" data-id="lvalue">lvalue</td><td class="big-box" data-id="rvalue">rvalue</td></tr>
+                        <tr><td data-id="has-identity">Has identity<br/>&nbsp;</td><td data-id="no-identity">No identity<br/>&nbsp;</td></tr>
+                    </table>
+                    <pre class="current-visible" data-id="code"><code data-trim>
+                    std::string s{"foo"};
+                    f(s); //lvalue
+                    f(std::string{"foo"}); //rvalue
+                    </code></pre>
+                    <aside class="notes" data-markdown>
+                    - So let's not move from lvalues
+                    </aside>
+                </section>
+
+                <section data-auto-animate>
+                    <table>
+                        <tr><td class="red" data-id="cant-move">Can't move</td><td data-id="can-move">Can move</td></tr>
+                        <tr><td class="big-box red" data-id="lvalue">lvalue</td><td class="big-box" data-id="rvalue">rvalue</td></tr>
+                        <tr><td class="red" data-id="has-identity">Has identity<br/>&nbsp;</td><td data-id="no-identity">No identity<br/>&nbsp;</td></tr>
+                    </table>
+                    <pre class="current-visible" data-id="code"><code data-trim>
+                    std::string s{"foo"}
+                    f(std::move(s)); //???
+                    f(std::string{"foo"}); //rvalue
+                    </code></pre>
+                    <aside class="notes" data-markdown>
+                    - But what about std::move?
+                    - But some things in red here, this doesn't work
+                    </aside>
+                </section>
+
+                <section data-auto-animate>
+                    <table>
+                        <tr><td data-id="cant-move2">Can't move</td><td class="big-box" data-id="lvalue">lvalue</td><td></td></tr>
+                        <tr><td data-id="can-move2">Can move</td><td></td><td class="big-box" data-id="rvalue">rvalue</td></tr>
+                        <tr><td></td><td data-id="has-identity">Has identity<br/>&nbsp;</td><td data-id="no-identity">No identity<br/>&nbsp;</td></tr>
+                    </table>
+                    <pre data-id="code"><code data-trim>
+                    std::string s{"foo"};
+                    f(s); //lvalue
+                    f(std::string{"foo"}); //rvalue
+                    </code></pre>
+                    <aside class="notes" data-markdown>
+                    - Identity and movability are two orthogonal concerns
+                    - In our example so far:
+                    - lvalue has identity, can't move
+                    - rvalue has no identity, can move
+                    </aside>
+                </section>
+
+                <section data-auto-animate>
+                    <table>
+                        <tr><td data-id="cant-move2">Can't move</td><td class="big-box" data-id="lvalue">lvalue</td><td></td></tr>
+                        <tr><td data-id="can-move2">Can move</td><td class="big-box" data-id="xvalue">xvalue</td><td class="big-box" data-id="rvalue">rvalue</td></tr>
+                        <tr><td></td><td data-id="has-identity">Has identity<br/>&nbsp;</td><td data-id="no-identity">No identity<br/>&nbsp;</td></tr>
+                    </table>
+                    <pre data-id="code"><code data-trim>
+                    std::string s{"foo"};
+                    f(s); //lvalue
+                    f(std::string{"foo"}); //rvalue
+                    f(std::move(s)); //xvalue
+                    </code></pre>
+                    <aside class="notes" data-markdown>
+                    - What if we std::move here
+                    - Now refers to s with identiy, but can also move from it
+                    - Call that an xvalue, or expiring lvalue, not being used after this
+                    - No expressions have no identiy and immovable, nothing in that square
+                    </aside>
+                </section>
+
+                <section data-auto-animate>
+                    <table>
+                        <tr><td data-id="cant-move2">Can't move</td><td class="big-box" data-id="lvalue">lvalue</td><td></td></tr>
+                        <tr><td data-id="can-move2">Can move</td><td class="big-box" data-id="xvalue">xvalue</td><td class="big-box" data-id="rvalue">prvalue</td></tr>
+                        <tr><td></td><td data-id="has-identity">Has identity<br/>&nbsp;</td><td data-id="no-identity">No identity<br/>&nbsp;</td></tr>
+                    </table>
+                    <pre data-id="code"><code data-trim>
+                    std::string s{"foo"};
+                    f(s); //lvalue
+                    f(std::string{"foo"}); //prvalue
+                    f(std::move(s)); //xvalue
+                    </code></pre>
+                    <aside class="notes" data-markdown>
+                    - Also renamed rvalue to prvalue, pure rvalue
+                    - These are the three fundamental value categories of C++11
+                    - What about glvalue and the new rvalue? No space left in the diagram?
+                    - We have actually talked about these already!
+                    </aside>
+                </section>
+
+                <section data-auto-animate>
+                    <table>
+                        <tr><td data-id="cant-move2">Can't move</td><td class="hl-box" data-id="lvalue">lvalue</td><td></td></tr>
+                        <tr><td data-id="can-move2">Can move</td><td class="hl-box" data-id="xvalue">xvalue</td><td class="big-box" data-id="rvalue">prvalue</td></tr>
+                        <tr><td></td><td class="hl" data-id="has-identity">Has identity<br />glvalue</td><td data-id="no-identity">No identity<br/>&nbsp;</td></tr>
+                    </table>
+                    <pre data-id="code"><code data-trim>
+                    std::string s{"foo"};
+                    f(s); //lvalue / glvalue
+                    f(std::string{"foo"}); //prvalue
+                    f(std::move(s)); //xvalue / glvalue
+                    </code></pre>
+                    <aside class="notes" data-markdown>
+                    - glvalue is simply anything with an identity.
+                    - Generalised lvalue
+                    </aside>
+                </section>
+
+                <section data-auto-animate>
+                    <table>
+                        <tr><td data-id="cant-move2">Can't move</td><td class="big-box highlight" data-id="lvalue">lvalue</td><td></td></tr>
+                        <tr><td class="hl" data-id="can-move2">Can move<br/>rvalue</td><td class="hl-box" data-id="xvalue">xvalue</td><td class="hl-box" data-id="rvalue">prvalue</td></tr>
+                        <tr><td></td><td data-id="has-identity">Has identity<br />glvalue</td><td data-id="no-identity">No identity<br/>&nbsp;</td></tr>
+                    </table>
+                    <pre data-id="code"><code data-trim>
+                    std::string s{"foo"};
+                    f(s); //lvalue / glvalue
+                    f(std::string{"foo"}); //prvalue / rvalue
+                    f(std::move(s)); //xvalue / glvalue / rvalue
+                    </code></pre>
+                    <aside class="notes" data-markdown>
+                    - And rvalue now means anything you can move from
+                    </aside>
+                </section>
+
+                <section data-auto-animate>
+                    <table>
+                        <tr><td data-id="cant-move2">Can't move</td><td class="big-box highlight" data-id="lvalue">lvalue</td><td></td></tr>
+                        <tr><td data-id="can-move2">Can move<br/>rvalue</td><td class="big-box" data-id="xvalue">xvalue</td><td class="big-box" data-id="rvalue">prvalue</td></tr>
+                        <tr><td></td><td data-id="has-identity">Has identity<br />glvalue</td><td data-id="no-identity">No identity<br/>&nbsp;</td></tr>
+                    </table>
+                    <pre data-id="code"><code data-trim>
+                    std::string s{"foo"};
+                    f(s); //lvalue / glvalue
+                    f(std::string{"foo"}); //prvalue / rvalue
+                    f(std::move(s)); //xvalue / glvalue / rvalue
+                    </code></pre>
+                    <aside class="notes" data-markdown>
+                    - That's it!
+                    </aside>
+                </section>
+
 			</div>
 		</div>
 
