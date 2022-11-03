@@ -45,6 +45,16 @@
                     #### Anders Schau Knatten, Zivid
                     ##### Oslo C++ Users Group
                     ##### 2022-11-03
+
+                    Note:
+                    - Who knows what all of these mean?
+                </section>
+
+				<section data-markdown>
+                    ## lvalues, rvalues
+
+                    Note:
+                    - Is this better?
                 </section>
 
                 <section data-auto-animate>
@@ -69,6 +79,7 @@
                         </code></pre>
                     </div>
                     <aside class="notes" data-markdown>
+                    - Who has some idea about lvalues and rvalues
                     - Before C++11 had only two value categories
                     - Lvalues things with identity, rvalues not
                     - Lvalues typically left hand side of expression
@@ -109,7 +120,9 @@
                     </code></pre>
                     <aside class="notes" data-markdown>
                     - But what about std::move?
-                    - But some things in red here, this doesn't work
+                    - This is still referring to the object s, which has an identity
+                    - But we should be allowed to move from it
+                    - Put some things in red here, this doesn't work
                     </aside>
                 </section>
 
